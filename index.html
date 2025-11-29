@@ -285,15 +285,50 @@
         });
 
         // 2. RSVP Form Logic
-        document.getElementById('rsvpForm').addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            const btn = this.querySelector('button');
-            const originalText = btn.innerText;
+        // --- UPDATED RSVP LOGIC ---
+    document.getElementById('rsvpForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Stop page reload
+        
+        const btn = this.querySelector('button');
+        const form = this;
+        const originalText = btn.innerText;
 
-            btn.innerText = "YOU'RE ON THE LIST";
-            btn.style.backgroundColor = "#4BB543"; 
-            btn.style.color = "#fff";
-            btn.disabled = true; // Prevent double submission
+        // 1. Visual Feedback
+        btn.innerText = "SENDING...";
+        btn.style.opacity = "0.7";
+
+        // 2. Prepare Data
+        const formData = new FormData(form);
+        // PASTE YOUR ACCESS KEY BELOW INSIDE THE QUOTES
+        formData.append("access_key", "f4b7df4d-bef0-49e1-a878-79892411c7ae"); 
+
+        // 3. Send Data to Web3Forms
+        fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            body: formData
+        })
+        .then(async (response) => {
+            if (response.status === 200) {
+                // SUCCESS
+                btn.innerText = "YOU'RE ON THE LIST";
+                btn.style.backgroundColor = "#4BB543"; 
+                btn.style.color = "#fff";
+                btn.disabled = true;
+                form.reset();
+                setTimeout(() => { alert("Check your email! (Just kidding, I got the notification). Screenshot this for entry."); }, 500);
+            } else {
+                // ERROR
+                console.log(response);
+                btn.innerText = "ERROR - TRY AGAIN";
+                setTimeout(() => { btn.innerText = originalText; btn.style.opacity = "1"; }, 3000);
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            btn.innerText = "ERROR - CHECK INTERNET";
+            setTimeout(() => { btn.innerText = originalText; btn.style.opacity = "1"; }, 3000);
+        });
+    });
 
             // In a real app, you would send data to a backend (Firebase/SheetDB) here
             setTimeout(() => { 
@@ -327,3 +362,4 @@
 </body>
 
 </html>
+
